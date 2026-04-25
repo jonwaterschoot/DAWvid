@@ -4,8 +4,7 @@ A CLAP plugin that plays a video file in sync with a DAW transport. Includes a c
 
 ---
 
-![DAWvid rinning in Bitwig 6 on Win 11](img/DAWvid_screenshot02.png)
-
+![DAWvid running in Bitwig 6 on Win 11](img/DAWvid_screenshot0_logo.png)
 ---
 
 ## Features
