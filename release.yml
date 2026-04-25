@@ -1,0 +1,60 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install FFmpeg
+        run: |
+          choco install ffmpeg -y
+
+      - name: Configure
+        shell: bash
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DFFMPEG_ROOT="C:/ProgramData/chocolatey/lib/ffmpeg/tools/ffmpeg-master-latest-win64-gpl-shared"
+
+      - name: Build
+        run: |
+          cmake --build build --parallel
+
+      - name: Create installer package
+        run: |
+          cmake --build build --target dist
+
+      - name: Create ZIP archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: DAWvid-windows-installer
+          path: build/dist/DAWvid-install/
+          retention-days: 7
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: DAWvid-windows-installer
+
+      - name: Create ZIP
+        run: |
+          zip -r DAWvid-windows.zip DAWvid-install/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: DAWvid-windows.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

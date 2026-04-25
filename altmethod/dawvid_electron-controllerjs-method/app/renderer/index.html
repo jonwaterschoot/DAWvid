@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DAWvid</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400&display=swap');
+
+  :root {
+    --bg:        #080808;
+    --surface:   #111111;
+    --border:    #1f1f1f;
+    --accent:    #e8ff47;   /* sharp yellow-green — like a clapperboard stripe */
+    --accent2:   #ff4747;
+    --text:      #c8c8c8;
+    --dim:       #444;
+    --bar-h:     48px;
+    --radius:    3px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    overflow: hidden;
+    user-select: none;
+    -webkit-app-region: no-drag;
+  }
+
+  /* ── Layout ────────────────────────────────────────────────────────────── */
+  #root {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  /* macOS traffic-light drag region */
+  #titlebar {
+    -webkit-app-region: drag;
+    height: 28px;
+    background: var(--bg);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    padding-left: 80px; /* room for traffic lights */
+    gap: 8px;
+  }
+  #titlebar .title {
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  /* ── Video area ─────────────────────────────────────────────────────────── */
+  #video-wrap {
+    flex: 1;
+    position: relative;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+  }
+
+  video {
+    max-width: 100%;
+    max-height: 100%;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  /* Drop zone overlay */
+  #drop-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    pointer-events: none;
+  }
+  #drop-overlay.hidden { display: none; }
+
+  .drop-icon {
+    width: 56px;
+    height: 56px;
+    border: 1.5px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.4;
+  }
+  .drop-icon svg { width: 24px; height: 24px; stroke: var(--text); fill: none; stroke-width: 1.5; }
+
+  .drop-label {
+    color: var(--dim);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .drop-label span {
+    color: var(--accent);
+    cursor: pointer;
+    pointer-events: all;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .drop-label span:hover { opacity: 0.7; }
+
+  /* Drag-over highlight */
+  body.drag-over #video-wrap {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+
+  /* ── Control bar ────────────────────────────────────────────────────────── */
+  #controls {
+    height: var(--bar-h);
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  /* Play/pause button */
+  #btn-play {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.15s, background 0.15s;
+    flex-shrink: 0;
+  }
+  #btn-play:hover { border-color: var(--accent); background: rgba(232,255,71,0.05); }
+  #btn-play svg { width: 14px; height: 14px; fill: var(--text); }
+  #btn-play.playing svg.icon-play  { display: none; }
+  #btn-play:not(.playing) svg.icon-pause { display: none; }
+
+  /* Timecode */
+  #timecode {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: var(--text);
+    min-width: 72px;
+    flex-shrink: 0;
+  }
+
+  /* Scrub bar */
+  #scrub-wrap {
+    flex: 1;
+    position: relative;
+    height: 20px;
+    display: flex;
+    align-items: center;
+  }
+  #scrub-track {
+    width: 100%;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    position: relative;
+    cursor: pointer;
+  }
+  #scrub-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.05s linear;
+  }
+  #scrub-thumb {
+    position: absolute;
+    top: 50%;
+    left: 0%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  #scrub-track:hover #scrub-thumb { opacity: 1; }
+  #scrub-track:hover { height: 5px; }
+
+  /* Duration */
+  #duration {
+    font-size: 11px;
+    color: var(--dim);
+    min-width: 52px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* Divider */
+  .sep {
+    width: 1px;
+    height: 20px;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+
+  /* Status dot */
+  #status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+  #status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--dim);
+    transition: background 0.3s;
+  }
+  #status-dot.connected    { background: var(--accent); }
+  #status-dot.disconnected { background: var(--dim); }
+  #status-label {
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* Open file button */
+  #btn-open {
+    height: 28px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  #btn-open:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Volume */
+  #vol-wrap { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  #vol-wrap svg { width: 13px; height: 13px; stroke: var(--dim); fill: none; stroke-width: 1.5; }
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 60px;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--text);
+    cursor: pointer;
+  }
+
+  /* Sync indicator flash */
+  @keyframes sync-flash {
+    0%   { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  #sync-flash {
+    position: absolute;
+    top: 8px; right: 10px;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    opacity: 0;
+    pointer-events: none;
+  }
+  #sync-flash.active { animation: sync-flash 0.6s ease-out forwards; }
+</style>
+</head>
+<body>
+
+<div id="root">
+  <!-- macOS titlebar drag region -->
+  <div id="titlebar">
+    <span class="title">DAWvid</span>
+  </div>
+
+  <!-- Video area -->
+  <div id="video-wrap">
+    <video id="video" preload="metadata"></video>
+
+    <div id="drop-overlay">
+      <div class="drop-icon">
+        <svg viewBox="0 0 24 24"><path d="M15 10l-6 4 6 4V10z"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
+      </div>
+      <div class="drop-label">
+        Drop a video file or <span id="open-link">browse</span>
+      </div>
+    </div>
+
+    <div id="sync-flash">SYNC</div>
+  </div>
+
+  <!-- Controls -->
+  <div id="controls">
+    <!-- Play/pause -->
+    <button id="btn-play" title="Play / Pause (also controls Bitwig)">
+      <svg class="icon-play"  viewBox="0 0 16 16"><path d="M4 2l10 6-10 6V2z"/></svg>
+      <svg class="icon-pause" viewBox="0 0 16 16"><rect x="2" y="2" width="4" height="12"/><rect x="10" y="2" width="4" height="12"/></svg>
+    </button>
+
+    <!-- Timecode -->
+    <span id="timecode">00:00:00</span>
+
+    <!-- Scrub bar -->
+    <div id="scrub-wrap">
+      <div id="scrub-track">
+        <div id="scrub-fill"></div>
+        <div id="scrub-thumb"></div>
+      </div>
+    </div>
+
+    <!-- Duration -->
+    <span id="duration">--:--:--</span>
+
+    <div class="sep"></div>
+
+    <!-- Volume -->
+    <div id="vol-wrap">
+      <svg viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg>
+      <input type="range" id="vol-slider" min="0" max="1" step="0.02" value="1" />
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Open file -->
+    <button id="btn-open">Open</button>
+
+    <!-- DAW status -->
+    <div id="status">
+      <div id="status-dot" class="disconnected"></div>
+      <span id="status-label">No DAW</span>
+    </div>
+  </div>
+</div>
+
+<script src="player.js"></script>
+</body>
+</html>

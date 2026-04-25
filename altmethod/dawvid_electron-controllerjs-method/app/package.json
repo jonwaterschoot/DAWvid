@@ -1,0 +1,24 @@
+{
+  "name": "dawvid",
+  "version": "1.0.0",
+  "description": "DAW-synced video player for Bitwig and other CLAP hosts",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev":   "electron . --enable-logging",
+    "build": "electron-builder"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "build": {
+    "appId": "com.dawvid.app",
+    "productName": "DAWvid",
+    "files": ["main.js", "renderer/**/*"],
+    "mac":     { "target": "dmg" },
+    "win":     { "target": "nsis" },
+    "linux":   { "target": "AppImage" }
+  }
+}
