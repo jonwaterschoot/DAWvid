@@ -1,0 +1,208 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libavcodec-dev libavformat-dev libavutil-dev libswscale-dev
+
+      - name: Configure
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: |
+          cmake --build build --parallel
+
+      - name: Create portable package
+        run: |
+          mkdir -p dist/DAWvid-linux-x64
+          # Copy the plugin
+          cp build/src/DAWvid.so dist/DAWvid-linux-x64/ 2>/dev/null || cp build/src/*.so dist/DAWvid-linux-x64/
+          # Copy README
+          cp README.md dist/DAWvid-linux-x64/
+          # Create install instructions
+          cat > dist/DAWvid-linux-x64/INSTALL.md << 'EOF'
+          # DAWvid Installation (Linux)
+
+          ## Requirements
+          - FFmpeg libraries installed system-wide:
+            ```bash
+            sudo apt install libavcodec-dev libavformat-dev libavutil-dev libswscale-dev
+            ```
+          - A CLAP-compatible host (Bitwig Studio, REAPER, etc.)
+
+          ## Installation
+          1. Copy `DAWvid.so` to your CLAP plugins folder:
+             - `~/.clap/` or `~/.local/share/clap/`
+          2. Restart your DAW
+          3. Scan for plugins
+
+          ## Notes
+          - FFmpeg must be installed on your system (the .so links to system FFmpeg libraries)
+          - For Bitwig Studio, also copy `bitwig/DAWvid.control.js` to Bitwig's Controllers folder
+          EOF
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DAWvid-linux-x64
+          path: dist/
+          retention-days: 7
+
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install FFmpeg
+        run: |
+          brew install ffmpeg
+
+      - name: Configure
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: |
+          cmake --build build --parallel
+
+      - name: Create portable package
+        run: |
+          mkdir -p dist/DAWvid-macos-x64
+          # Copy the plugin
+          cp build/src/DAWvid.dylib dist/DAWvid-macos-x64/ 2>/dev/null || cp build/src/*.dylib dist/DAWvid-macos-x64/
+          # Copy README
+          cp README.md dist/DAWvid-macos-x64/
+          # Create install instructions
+          cat > dist/DAWvid-macos-x64/INSTALL.md << 'EOF'
+          # DAWvid Installation (macOS)
+
+          ## Requirements
+          - FFmpeg installed via Homebrew:
+            ```bash
+            brew install ffmpeg
+            ```
+          - A CLAP-compatible host (Bitwig Studio, REAPER, etc.)
+
+          ## Installation
+          1. Copy `DAWvid.dylib` to your CLAP plugins folder:
+             - `~/Library/Application Support/CLAP/`
+          2. Restart your DAW
+          3. Scan for plugins
+
+          ## Notes
+          - FFmpeg must be installed (the .dylib links to Homebrew's FFmpeg)
+          - For Bitwig Studio, also copy `bitwig/DAWvid.control.js` to Bitwig's Controllers folder
+          EOF
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DAWvid-macos-x64
+          path: dist/
+          retention-days: 7
+
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install FFmpeg
+        run: |
+          choco install ffmpeg -y
+
+      - name: Configure
+        shell: bash
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DFFMPEG_ROOT="C:/ProgramData/chocolatey/lib/ffmpeg/tools/ffmpeg-master-latest-win64-gpl-shared"
+
+      - name: Build
+        run: |
+          cmake --build build --parallel
+
+      - name: Create portable package
+        run: |
+          mkdir -p dist/DAWvid-windows-x64
+          # Copy the plugin
+          cp build/src/DAWvid.clap dist/DAWvid-windows-x64/
+          # Copy FFmpeg DLLs
+          cp "C:/ProgramData/chocolatey/lib/ffmpeg/tools/ffmpeg-master-latest-win64-gpl-shared/bin/"*.dll dist/DAWvid-windows-x64/
+          # Copy README
+          cp README.md dist/DAWvid-windows-x64/
+          # Copy installer scripts for reference
+          cp installer/install.bat dist/DAWvid-windows-x64/
+          cp installer/install.ps1 dist/DAWvid-windows-x64/
+          cp installer/INSTALL-README.txt dist/DAWvid-windows-x64/
+          # Create install instructions
+          @"
+# DAWvid Installation (Windows)
+
+## Requirements
+- A CLAP-compatible host (Bitwig Studio, REAPER, etc.)
+
+## Installation
+1. Copy all files in this folder to your CLAP plugins folder:
+   - `%APPDATA%\CLAP\`
+2. Restart your DAW
+3. Scan for plugins
+
+## Notes
+- FFmpeg DLLs are included (avcodec, avformat, avutil, swresample, swscale)
+- For Bitwig Studio, also copy `bitwig/DAWvid.control.js` to Bitwig's Controllers folder
+- Alternatively, run `install.bat` or `install.ps1` for guided installation
+"@ | Out-File -FilePath dist/DAWvid-windows-x64/INSTALL.md -Encoding utf8
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DAWvid-windows-x64
+          path: dist/
+          retention-days: 7
+
+  release:
+    needs: [build-linux, build-macos, build-windows]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create ZIP archives
+        run: |
+          cd artifacts
+          zip -r DAWvid-linux-x64.zip DAWvid-linux-x64/
+          zip -r DAWvid-macos-x64.zip DAWvid-macos-x64/
+          zip -r DAWvid-windows-x64.zip DAWvid-windows-x64/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/DAWvid-linux-x64.zip
+            artifacts/DAWvid-macos-x64.zip
+            artifacts/DAWvid-windows-x64.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
