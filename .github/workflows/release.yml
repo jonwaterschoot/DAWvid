@@ -127,14 +127,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install FFmpeg
-        run: |
-          choco install ffmpeg -y
-
       - name: Configure
         shell: bash
         run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DFFMPEG_ROOT="C:/ProgramData/chocolatey/lib/ffmpeg/tools/ffmpeg-master-latest-win64-gpl-shared"
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DFFMPEG_ROOT="${{ github.workspace }}/deps/ffmpeg-master-latest-win64-gpl-shared"
 
       - name: Build
         run: |
@@ -147,7 +143,7 @@ jobs:
           # Copy the plugin
           cp build/src/DAWvid.clap dist/DAWvid-windows-x64/
           # Copy FFmpeg DLLs
-          cp "C:/ProgramData/chocolatey/lib/ffmpeg/tools/ffmpeg-master-latest-win64-gpl-shared/bin/"*.dll dist/DAWvid-windows-x64/
+          cp deps/ffmpeg-master-latest-win64-gpl-shared/bin/*.dll dist/DAWvid-windows-x64/
           # Copy README
           cp README.md dist/DAWvid-windows-x64/
           # Copy installer scripts for reference
