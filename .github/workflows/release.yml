@@ -141,6 +141,7 @@ jobs:
           cmake --build build --parallel
 
       - name: Create portable package
+        shell: bash
         run: |
           mkdir -p dist/DAWvid-windows-x64
           # Copy the plugin
@@ -154,23 +155,23 @@ jobs:
           cp installer/install.ps1 dist/DAWvid-windows-x64/
           cp installer/INSTALL-README.txt dist/DAWvid-windows-x64/
           # Create install instructions
-          @"
-# DAWvid Installation (Windows)
+          cat > dist/DAWvid-windows-x64/INSTALL.md << 'EOF'
+          # DAWvid Installation (Windows)
 
-## Requirements
-- A CLAP-compatible host (Bitwig Studio, REAPER, etc.)
+          ## Requirements
+          - A CLAP-compatible host (Bitwig Studio, REAPER, etc.)
 
-## Installation
-1. Copy all files in this folder to your CLAP plugins folder:
-   - `%APPDATA%\CLAP\`
-2. Restart your DAW
-3. Scan for plugins
+          ## Installation
+          1. Copy all files in this folder to your CLAP plugins folder:
+             - %APPDATA%\CLAP\
+          2. Restart your DAW
+          3. Scan for plugins
 
-## Notes
-- FFmpeg DLLs are included (avcodec, avformat, avutil, swresample, swscale)
-- For Bitwig Studio, also copy `bitwig/DAWvid.control.js` to Bitwig's Controllers folder
-- Alternatively, run `install.bat` or `install.ps1` for guided installation
-"@ | Out-File -FilePath dist/DAWvid-windows-x64/INSTALL.md -Encoding utf8
+          ## Notes
+          - FFmpeg DLLs are included (avcodec, avformat, avutil, swresample, swscale)
+          - For Bitwig Studio, also copy bitwig/DAWvid.control.js to Bitwig's Controllers folder
+          - Alternatively, run install.bat or install.ps1 for guided installation
+          EOF
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
