@@ -44,6 +44,7 @@ jobs:
           cmake --build build --parallel
 
       - name: Verify build output
+        shell: bash
         run: |
           echo "Listing build/ contents:"
           ls -R build/ || echo "build/ not found"
@@ -105,6 +106,7 @@ jobs:
           cmake --build build --parallel
 
       - name: Verify build output
+        shell: bash
         run: |
           echo "Listing build/ contents:"
           ls -R build/ || echo "build/ not found"
@@ -178,6 +180,7 @@ jobs:
           cmake --build build --parallel
 
       - name: Verify build output
+        shell: bash
         run: |
           echo "Listing build/ contents:"
           ls -R build/ || echo "build/ not found"
