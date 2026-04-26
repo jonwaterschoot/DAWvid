@@ -17,12 +17,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Python dependencies
-        run: pip install jinja2
+        run: python -m pip install jinja2
 
-      - name: Install FFmpeg
+      - name: Install build tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libgl1-mesa-dev libx11-dev
+          sudo apt-get install -y build-essential libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libgl1-mesa-dev libx11-dev
 
       - name: Configure
         run: |
