@@ -43,7 +43,7 @@ jobs:
         run: |
           mkdir -p dist/DAWvid-linux-x64
           # Copy the plugin
-          cp build/src/DAWvid.so dist/DAWvid-linux-x64/ 2>/dev/null || cp build/src/*.so dist/DAWvid-linux-x64/
+          cp build/src/DAWvid.clap dist/DAWvid-linux-x64/
           # Copy README
           cp README.md dist/DAWvid-linux-x64/
           # Create install instructions
@@ -97,8 +97,8 @@ jobs:
       - name: Create portable package
         run: |
           mkdir -p dist/DAWvid-macos-x64
-          # Copy the plugin
-          cp build/src/DAWvid.dylib dist/DAWvid-macos-x64/ 2>/dev/null || cp build/src/*.dylib dist/DAWvid-macos-x64/
+          # Copy the plugin (it's a bundle directory on macOS)
+          cp -R build/src/DAWvid.clap dist/DAWvid-macos-x64/
           # Copy README
           cp README.md dist/DAWvid-macos-x64/
           # Create install instructions
@@ -165,8 +165,8 @@ jobs:
         shell: bash
         run: |
           mkdir -p dist/DAWvid-windows-x64
-          # Copy the plugin
-          cp build/src/DAWvid.clap dist/DAWvid-windows-x64/
+          # Copy the plugin (Visual Studio puts it in a Release/ subfolder)
+          cp build/src/Release/DAWvid.clap dist/DAWvid-windows-x64/ 2>/dev/null || cp build/src/DAWvid.clap dist/DAWvid-windows-x64/
           # Copy FFmpeg DLLs
           cp deps/ffmpeg-master-latest-win64-gpl-shared/bin/*.dll dist/DAWvid-windows-x64/
           # Copy README
