@@ -45,15 +45,15 @@ jobs:
 
       - name: Verify build output
         run: |
-          echo "Listing build/src/ contents:"
-          ls -R build/src/ || echo "build/src/ not found"
+          echo "Listing build/ contents:"
+          ls -R build/ || echo "build/ not found"
           find build -name "DAWvid.clap"
 
       - name: Create portable package
         run: |
           mkdir -p dist/DAWvid-linux-x64
           # Copy the plugin
-          cp build/src/DAWvid.clap dist/DAWvid-linux-x64/
+          cp build/DAWvid.clap dist/DAWvid-linux-x64/
           # Copy README
           cp README.md dist/DAWvid-linux-x64/
           # Create install instructions
@@ -106,15 +106,15 @@ jobs:
 
       - name: Verify build output
         run: |
-          echo "Listing build/src/ contents:"
-          ls -R build/src/ || echo "build/src/ not found"
+          echo "Listing build/ contents:"
+          ls -R build/ || echo "build/ not found"
           find build -name "DAWvid.clap"
 
       - name: Create portable package
         run: |
           mkdir -p dist/DAWvid-macos-x64
           # Copy the plugin (it's a bundle directory on macOS)
-          cp -R build/src/DAWvid.clap dist/DAWvid-macos-x64/
+          cp -R build/DAWvid.clap dist/DAWvid-macos-x64/
           # Copy README
           cp README.md dist/DAWvid-macos-x64/
           # Create install instructions
@@ -179,8 +179,8 @@ jobs:
 
       - name: Verify build output
         run: |
-          echo "Listing build/src/ contents:"
-          ls -R build/src/ || echo "build/src/ not found"
+          echo "Listing build/ contents:"
+          ls -R build/ || echo "build/ not found"
           find build -name "DAWvid.clap"
 
       - name: Create portable package
@@ -188,7 +188,7 @@ jobs:
         run: |
           mkdir -p dist/DAWvid-windows-x64
           # Copy the plugin (Visual Studio puts it in a Release/ subfolder)
-          cp build/src/Release/DAWvid.clap dist/DAWvid-windows-x64/ 2>/dev/null || cp build/src/DAWvid.clap dist/DAWvid-windows-x64/
+          cp build/Release/DAWvid.clap dist/DAWvid-windows-x64/ 2>/dev/null || cp build/DAWvid.clap dist/DAWvid-windows-x64/
           # Copy FFmpeg DLLs
           cp deps/ffmpeg-master-latest-win64-gpl-shared/bin/*.dll dist/DAWvid-windows-x64/
           # Copy README
