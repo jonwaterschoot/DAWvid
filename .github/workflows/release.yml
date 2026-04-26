@@ -187,43 +187,18 @@ jobs:
           find build -name "DAWvid.clap"
 
       - name: Create portable package
-        shell: bash
         run: |
-          mkdir -p dist/DAWvid-windows-x64
-          # Copy the plugin (Visual Studio puts it in a Release/ subfolder)
-          cp build/Release/DAWvid.clap dist/DAWvid-windows-x64/ 2>/dev/null || cp build/DAWvid.clap dist/DAWvid-windows-x64/
-          # Copy FFmpeg DLLs
-          cp deps/ffmpeg-master-latest-win64-gpl-shared/bin/*.dll dist/DAWvid-windows-x64/
-          # Copy README
-          cp README.md dist/DAWvid-windows-x64/
-          # Copy installer scripts for reference
-          cp installer/install.bat dist/DAWvid-windows-x64/
-          cp installer/install.ps1 dist/DAWvid-windows-x64/
-          cp installer/INSTALL-README.txt dist/DAWvid-windows-x64/
-          # Create install instructions
-          cat > dist/DAWvid-windows-x64/INSTALL.md << 'EOF'
-          # DAWvid Installation (Windows)
-
-          ## Requirements
-          - A CLAP-compatible host (Bitwig Studio, REAPER, etc.)
-
-          ## Installation
-          1. Copy all files in this folder to your CLAP plugins folder:
-             - %APPDATA%\CLAP\
-          2. Restart your DAW
-          3. Scan for plugins
-
-          ## Notes
-          - FFmpeg DLLs are included (avcodec, avformat, avutil, swresample, swscale)
-          - For Bitwig Studio, also copy bitwig/DAWvid.control.js to Bitwig's Controllers folder
-          - Alternatively, run install.bat or install.ps1 for guided installation
-          EOF
+          cmake --build build --target dist
+          # The dist target puts everything in build/dist/DAWvid-install/
+          # We'll rename/move it to match our release naming convention
+          mkdir -p dist
+          mv build/dist/DAWvid-install dist/DAWvid-windows-x64
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: DAWvid-windows-x64
-          path: dist/
+          path: dist/DAWvid-windows-x64/
           retention-days: 7
 
   release:
