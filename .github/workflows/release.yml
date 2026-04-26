@@ -33,11 +33,21 @@ jobs:
         run: |
           PYTHON_EXE=$(python -c "import sys; print(sys.executable)")
           cmake -B build -DCMAKE_BUILD_TYPE=Release \
+            -DPython_EXECUTABLE="$PYTHON_EXE" \
             -DPython3_EXECUTABLE="$PYTHON_EXE"
 
       - name: Build
+        shell: bash
+        env:
+          PYTHONPATH: ${{ env.pythonLocation }}
         run: |
           cmake --build build --parallel
+
+      - name: Verify build output
+        run: |
+          echo "Listing build/src/ contents:"
+          ls -R build/src/ || echo "build/src/ not found"
+          find build -name "DAWvid.clap"
 
       - name: Create portable package
         run: |
@@ -93,6 +103,12 @@ jobs:
       - name: Build
         run: |
           cmake --build build --parallel
+
+      - name: Verify build output
+        run: |
+          echo "Listing build/src/ contents:"
+          ls -R build/src/ || echo "build/src/ not found"
+          find build -name "DAWvid.clap"
 
       - name: Create portable package
         run: |
@@ -160,6 +176,12 @@ jobs:
           PYTHONPATH: ${{ env.pythonLocation }}
         run: |
           cmake --build build --parallel
+
+      - name: Verify build output
+        run: |
+          echo "Listing build/src/ contents:"
+          ls -R build/src/ || echo "build/src/ not found"
+          find build -name "DAWvid.clap"
 
       - name: Create portable package
         shell: bash
