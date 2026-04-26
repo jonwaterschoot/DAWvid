@@ -10,6 +10,17 @@
 #include <thread>
 #include <functional>
 
+#if !defined(__APPLE__) && !defined(_WIN32)
+    #include <X11/Xlib.h>
+    #include <X11/Xutil.h>
+    #include <GL/glx.h>
+    // X11 defines macros that conflict with CLAP and other libraries.
+    #undef None
+    #undef Success
+    #undef Status
+    #undef Always
+#endif
+
 // ─────────────────────────────────────────────────────────────────────────────
 // GUIWindow
 //
@@ -106,9 +117,6 @@ private:
     static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
     static const wchar_t* WINDOW_CLASS_NAME;
 #else  // Linux / X11
-    #include <X11/Xlib.h>
-    #include <X11/Xutil.h>
-    #include <GL/glx.h>
     Display* m_display   = nullptr;
     Window   m_window    = 0;
     void*    m_glContext = nullptr; // GLXContext (opaque)

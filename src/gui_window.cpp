@@ -454,7 +454,7 @@ bool GUIWindow::setParent(const clap_window_t* window)
 
     // Choose a GLX visual with depth and double-buffer
     static int visualAttribs[] = {
-        GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None
+        GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, 0
     };
 
     // (Using legacy GLX for brevity — upgrade to glXChooseFBConfig for GL 3.3)
@@ -500,7 +500,7 @@ bool GUIWindow::setParent(const clap_window_t* window)
         return false;
     }
     m_renderer.resize(static_cast<int>(m_width), static_cast<int>(m_height));
-    glXMakeCurrent(m_display, None, nullptr); // release — tick() will re-bind
+    glXMakeCurrent(m_display, 0, nullptr); // release — tick() will re-bind
 
     // Start event thread
     m_running = true;
@@ -579,7 +579,7 @@ void GUIWindow::renderFrame()
     glXMakeCurrent(m_display, m_window, (GLXContext)m_glContext);
     m_renderer.render(frame);
     glXSwapBuffers(m_display, m_window);
-    glXMakeCurrent(m_display, None, nullptr);
+    glXMakeCurrent(m_display, 0, nullptr);
 #endif
 }
 
