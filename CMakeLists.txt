@@ -36,6 +36,9 @@ if(WIN32 OR (UNIX AND NOT APPLE))
     )
     FetchContent_MakeAvailable(glad2)
     glad_add_library(glad_gl_core_33 REPRODUCIBLE API gl:core=3.3)
+    if(UNIX AND NOT APPLE)
+        set_target_properties(glad_gl_core_33 PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    endif()
 endif()
 
 # ── Find FFmpeg ───────────────────────────────────────────────────────────────
