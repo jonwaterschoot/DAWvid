@@ -40,12 +40,6 @@ static GLADapiproc dawvidGLLoader(const char* name)
     }
     return p;
 }
-#else
-static GLADapiproc dawvidGLLoader(const char* name)
-{
-    return reinterpret_cast<GLADapiproc>(glXGetProcAddress(reinterpret_cast<const GLubyte*>(name)));
-}
-#endif
 
 LRESULT CALLBACK GUIWindow::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -66,8 +60,6 @@ LRESULT CALLBACK GUIWindow::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM l
                 self->m_width  = static_cast<uint32_t>(w > 0 ? w : 1);
                 self->m_height = static_cast<uint32_t>(h > 0 ? h : 1);
                 // Only resize GL viewport once renderer is ready.
-                // WM_SIZE fires during CreateWindowExW before we've created the
-                // GL context, so guard on m_hglrc to skip the premature call.
                 if (self->m_hglrc)
                     self->handleResize(w, h);
             }
@@ -78,14 +70,11 @@ LRESULT CALLBACK GUIWindow::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM l
                 int y = GET_Y_LPARAM(lParam);
                 int barTop = static_cast<int>(self->m_height) - 64;
                 if (y >= barTop && y < barTop + 14) {
-                    // Scrub bar zone (top 14px of the control bar)
                     self->m_scrubDragging = true;
                     SetCapture(hwnd);
                     self->handleScrub(x);
                 } else if (y >= barTop + 14) {
-                    // Button zone
                     if (x >= 8 && x < 108) {
-                        // Open file
                         self->openFileDialog();
                     } else if (x >= 116 && x < 172) {
                         if (self->m_playToggleCb)
@@ -122,10 +111,16 @@ LRESULT CALLBACK GUIWindow::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM l
                 self->renderFrame();
             return 0;
         case WM_ERASEBKGND:
-            return 1; // prevent flicker — GL handles background
+            return 1;
         default:
             return DefWindowProcW(hwnd, msg, wParam, lParam);
     }
+}
+#elif !defined(__APPLE__)
+// Linux/X11 GL loader
+static GLADapiproc dawvidGLLoader(const char* name)
+{
+    return reinterpret_cast<GLADapiproc>(glXGetProcAddress(reinterpret_cast<const GLubyte*>(name)));
 }
 #endif
 
@@ -497,7 +492,9 @@ bool GUIWindow::setParent(const clap_window_t* window)
 
     // Make context current and init renderer
     glXMakeCurrent(m_display, m_window, ctx);
+#ifndef __APPLE__
     gladLoadGL(dawvidGLLoader);
+#endif
     if (!m_renderer.init()) {
         fprintf(stderr, "[GUIWindow] GLRenderer init failed\n");
         return false;
