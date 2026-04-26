@@ -34,6 +34,13 @@ foreach(lib avcodec avformat avutil swresample swscale)
     endforeach()
 endforeach()
 
+# ── FFmpeg license (GPL compliance) ──────────────────────────────────────────
+if(EXISTS "${FFMPEG_ROOT}/LICENSE.txt")
+    file(COPY "${FFMPEG_ROOT}/LICENSE.txt" DESTINATION "${DIST_DIR}")
+    file(RENAME "${DIST_DIR}/LICENSE.txt" "${DIST_DIR}/FFMPEG-LICENSE.txt")
+    message(STATUS "  + FFMPEG-LICENSE.txt")
+endif()
+
 # ── Installer scripts ─────────────────────────────────────────────────────────
 file(COPY "${INSTALLER_DIR}/install.ps1"       DESTINATION "${DIST_DIR}")
 file(COPY "${INSTALLER_DIR}/install.bat"       DESTINATION "${DIST_DIR}")

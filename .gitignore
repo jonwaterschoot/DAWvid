@@ -37,5 +37,6 @@ Thumbs.db
 # Generated plugin
 *.clap
 *.dll
+!deps/**/*.dll
 *.so
 *.dylib

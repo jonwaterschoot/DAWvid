@@ -137,7 +137,7 @@ elseif(WIN32)
     target_link_libraries(DAWvid PRIVATE opengl32 gdi32 user32 glad_gl_core_33 delayimp ws2_32)
     # Delay-load FFmpeg so entry_init() can call SetDllDirectoryA() before any
     # FFmpeg symbol is resolved. Names must match the actual runtime DLL filenames.
-    set(FFMPEG_DELAY_DLLS "avcodec-62.dll;avformat-62.dll;avutil-60.dll;swscale-9.dll"
+    set(FFMPEG_DELAY_DLLS "avcodec-62.dll;avformat-62.dll;avutil-60.dll;swresample-6.dll;swscale-9.dll"
         CACHE STRING "FFmpeg DLL filenames for delay-loading (must match installed .dll names)")
     foreach(_dll ${FFMPEG_DELAY_DLLS})
         target_link_options(DAWvid PRIVATE /DELAYLOAD:${_dll})

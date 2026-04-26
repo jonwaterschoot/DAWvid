@@ -1,11 +1,32 @@
-# DAWvid — CLAP Video Player Plugin
+# DAWvid — CLAP Video Player Plugin for Bitwig
 
 A CLAP plugin that plays a video file in sync with a DAW transport. Includes a companion Bitwig Controller Extension for full two-way sync with Bitwig Studio.
+
+> [!NOTE]
+> This project was created for personal needs and has only been tested on **Windows 11** with **Bitwig Studio 6**. Other configurations may work but I have not tested them.
+
+Made by a Bitwig user for Bitwig users. Not affiliated with Bitwig in any way. Mostly made with Antigravity, Claude and Gemini.
 
 ---
 
 ![DAWvid running in Bitwig 6 on Win 11](img/DAWvid_screenshot0_logo.png)
+
 ---
+
+## Download
+
+Get the latest version from the [Releases page](https://github.com/jonwaterschoot/DAWvid/releases/latest).
+
+## Platform Support
+
+| Platform | Status |
+|----------|--------|
+| Windows | ✅ Tested |
+| macOS | ⚠️ Untested — built but not verified |
+| Linux | ⚠️ Untested — built but not verified |
+
+macOS and Linux builds are provided as-is. If you try them, 
+please open an issue to report whether they work!
 
 ## Features
 
@@ -30,6 +51,11 @@ A CLAP plugin that plays a video file in sync with a DAW transport. Includes a c
 | **Linux**: X11, GLX | system packages |
 | **macOS**: Cocoa, OpenGL.framework | Xcode / CommandLineTools |
 | **Windows**: WGL, WinSock2 | Windows SDK |
+
+
+---
+The UDP IPC code in `ipc_bridge.cpp` is cross-platform (WinSock2 on Windows, POSIX sockets on Linux/macOS).
+---
 
 ### Install FFmpeg dev libraries
 
@@ -222,13 +248,16 @@ Position values are in **beats** (quarter notes from the start of the arrangemen
 
 ---
 
-## Platform status
+## Platform Support
 
-| Platform | Plugin | Controller extension |
-|---|---|---|
-| **Windows (Win32 + WGL)** | ✅ Complete | ✅ JS (Bitwig 5+) |
-| **Linux (X11 + GLX)** | ✅ Complete | ✅ JS (Bitwig 5+) |
-| **macOS (Cocoa + NSOpenGL)** | 🔧 `setParent()` stub in `gui_window.cpp` | ✅ JS (Bitwig 5+) |
+| Platform | Status |
+|----------|--------|
+| Windows | ✅ Tested |
+| macOS | ⚠️ Untested — built but not verified |
+| Linux | ⚠️ Untested — built but not verified |
+
+macOS and Linux builds are provided as-is. If you try them, 
+please open an issue to report whether they work!
 
 The UDP IPC code in `ipc_bridge.cpp` is cross-platform (WinSock2 on Windows, POSIX sockets on Linux/macOS).
 
@@ -251,3 +280,9 @@ include/                 Matching headers
 bitwig/
   DAWvid.control.js      Bitwig Controller Extension (install separately)
 ```
+
+---
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
