@@ -8,6 +8,7 @@
       }
 
       .st1 {
+        display: none;
         fill: #1a1a1a;
       }
 
