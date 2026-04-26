@@ -45,14 +45,19 @@ jobs:
           PYTHON_EXE=$(python -c "import sys; print(sys.executable)")
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
             cmake -B build -DCMAKE_BUILD_TYPE=Release \
+              -DPython_EXECUTABLE="$PYTHON_EXE" \
               -DPython3_EXECUTABLE="$PYTHON_EXE" \
               -DFFMPEG_ROOT="${{ github.workspace }}/deps/ffmpeg-master-latest-win64-gpl-shared"
           else
             cmake -B build -DCMAKE_BUILD_TYPE=Release \
+              -DPython_EXECUTABLE="$PYTHON_EXE" \
               -DPython3_EXECUTABLE="$PYTHON_EXE"
           fi
 
       - name: Build
+        shell: bash
+        env:
+          PYTHONPATH: ${{ env.pythonLocation }}
         run: |
           cmake --build build --parallel
 
@@ -81,10 +86,14 @@ jobs:
         run: |
           PYTHON_EXE=$(python -c "import sys; print(sys.executable)")
           cmake -B build -DCMAKE_BUILD_TYPE=Release \
+            -DPython_EXECUTABLE="$PYTHON_EXE" \
             -DPython3_EXECUTABLE="$PYTHON_EXE" \
             -DFFMPEG_ROOT="${{ github.workspace }}/deps/ffmpeg-master-latest-win64-gpl-shared"
 
       - name: Build
+        shell: bash
+        env:
+          PYTHONPATH: ${{ env.pythonLocation }}
         run: |
           cmake --build build --parallel
 
