@@ -40,6 +40,12 @@ static GLADapiproc dawvidGLLoader(const char* name)
     }
     return p;
 }
+#else
+static GLADapiproc dawvidGLLoader(const char* name)
+{
+    return reinterpret_cast<GLADapiproc>(glXGetProcAddress(reinterpret_cast<const GLubyte*>(name)));
+}
+#endif
 
 LRESULT CALLBACK GUIWindow::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -491,6 +497,7 @@ bool GUIWindow::setParent(const clap_window_t* window)
 
     // Make context current and init renderer
     glXMakeCurrent(m_display, m_window, ctx);
+    gladLoadGL(dawvidGLLoader);
     if (!m_renderer.init()) {
         fprintf(stderr, "[GUIWindow] GLRenderer init failed\n");
         return false;

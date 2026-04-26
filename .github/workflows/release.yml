@@ -16,6 +16,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install Python dependencies
+        run: pip install jinja2
+
       - name: Install FFmpeg
         run: |
           sudo apt-get update

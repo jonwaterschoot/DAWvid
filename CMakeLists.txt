@@ -26,8 +26,8 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(clap_helpers)
 
-# GLAD 2 (OpenGL extension loader) — Windows needs runtime function loading
-if(WIN32)
+# GLAD 2 (OpenGL extension loader) — Windows and Linux need runtime function loading
+if(WIN32 OR (UNIX AND NOT APPLE))
     FetchContent_Declare(
         glad2
         GIT_REPOSITORY https://github.com/Dav1dde/glad.git
@@ -146,6 +146,7 @@ elseif(UNIX)
         ${OPENGL_gl_LIBRARY}
         GL
         X11
+        glad_gl_core_33
     )
     set_target_properties(DAWvid PROPERTIES
         PREFIX ""

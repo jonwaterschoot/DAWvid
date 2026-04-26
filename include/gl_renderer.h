@@ -10,8 +10,7 @@
     #include <windows.h>
     #include <glad/gl.h>  // GLAD 2 — provides GL 3.3 core declarations + loader
 #else
-    #include <GL/gl.h>
-    #include <GL/glext.h>
+    #include <glad/gl.h>
 #endif
 
 // ─────────────────────────────────────────────────────────────────────────────
